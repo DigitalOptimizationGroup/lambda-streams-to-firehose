@@ -32,6 +32,12 @@ function doNothingTransformer(data, callback) {
 };
 exports.doNothingTransformer = doNothingTransformer;
 
+
+
+//DOGADDED
+var zlib = require('zlib');  
+
+
 /**
  * Example transformer that converts a regular expression to delimited text
  */
@@ -53,27 +59,54 @@ exports.regexToDelimiter = regexToDelimiter;
 // var transformer = exports.regexToDelimiter.bind(undefined, /(myregex) (.*)/,
 // "|");
 
+
 function transformRecords(serviceName, transformer, userRecords, callback) {
     async.map(userRecords, function(userRecord, userRecordCallback) {
-	var dataItem = serviceName === KINESIS_SERVICE_NAME ? new Buffer(userRecord.data, 'base64').toString(targetEncoding) : userRecord;
 
-	transformer.call(undefined, dataItem, function(err, transformed) {
-	    if (err) {
-		console.log(JSON.stringify(err));
-		userRecordCallback(err);
-	    } else {
-		if (transformed && transformed instanceof Buffer) {
-		    // call the map callback with the
-		    // transformed Buffer decorated for use as a
-		    // Firehose batch entry
-		    userRecordCallback(null, transformed);
-		} else {
-		    // don't know what this transformed
-		    // object is
-		    userRecordCallback("Output of Transformer was malformed. Must be instance of Buffer or routable Object");
-		}
-	    }
-	});
+	if (serviceName === KINESIS_SERVICE_NAME){
+		new Buffer(userRecord.data, 'base64').toString(targetEncoding)
+		    var rdata=new Buffer(userRecord.data,"base64")
+		    zlib.unzip(rdata, function (err, dataItem) {
+				transformer.call(undefined, dataItem, function(err, transformed) {
+				    if (err) {
+					console.log(JSON.stringify(err));
+					userRecordCallback(err);
+				    } else {
+					if (transformed && transformed instanceof Buffer) {
+					    // call the map callback with the
+					    // transformed Buffer decorated for use as a
+					    // Firehose batch entry
+					    userRecordCallback(null, transformed);
+					} else {
+					    // don't know what this transformed
+					    // object is
+					    userRecordCallback("Output of Transformer was malformed. Must be instance of Buffer or routable Object");
+					}
+				    }
+				});
+		    });
+	}else{
+		var dataItem=userRecord;
+		transformer.call(undefined, dataItem, function(err, transformed) {
+		    if (err) {
+			console.log(JSON.stringify(err));
+			userRecordCallback(err);
+		    } else {
+			if (transformed && transformed instanceof Buffer) {
+			    // call the map callback with the
+			    // transformed Buffer decorated for use as a
+			    // Firehose batch entry
+			    userRecordCallback(null, transformed);
+			} else {
+			    // don't know what this transformed
+			    // object is
+			    userRecordCallback("Output of Transformer was malformed. Must be instance of Buffer or routable Object");
+			}
+		    }
+		});
+
+	}
+
     }, function(err, transformed) {
 	// user records have now been transformed, so call
 	// errors or invoke the transformed record processor

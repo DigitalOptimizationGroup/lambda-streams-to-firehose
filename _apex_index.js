@@ -7,4 +7,4 @@ try {
   // ignore
 }
 
-exports.handle = require('./index').processFinalRecords
+exports.handle = require('./index').handler

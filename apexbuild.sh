@@ -2,7 +2,8 @@
 
 version=`cat package.json | grep version | cut -d: -f2 | sed -e "s/\"//g" | sed -e "s/ //g" | sed -e "s/\,//g"`
 
-filename=apex.zip
+functionName=LambdaStreamToFirehose
+filename=$functionName-$version.zip
 
 npm install
 
